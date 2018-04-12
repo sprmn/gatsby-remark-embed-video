@@ -100,10 +100,10 @@ class EmbedVideo {
 }
 
 const addVideoIframe = ({ markdownAST }: any, options: EmbedVideoOptions) => {
-  visit(markdownAST, `inlineCode`, (node: { type: string, value: string }) => {
+  visit(markdownAST, `text`, (node: { type: string, value: string }) => {
     const { value } = node;
 
-    const processValue = value.match(/([^:]*):(.*)/);
+    const processValue = value.match(/\[([^:]*):(.*)\]/);
     if (processValue) {
       let type = processValue[1];
       let id = processValue[2];
