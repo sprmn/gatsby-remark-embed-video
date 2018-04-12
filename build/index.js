@@ -82,9 +82,9 @@ var EmbedVideo = /** @class */ (function () {
 }());
 var addVideoIframe = function (_a, options) {
     var markdownAST = _a.markdownAST;
-    visit(markdownAST, "inlineCode", function (node) {
+    visit(markdownAST, "text", function (node) {
         var value = node.value;
-        var processValue = value.match(/([^:]*):(.*)/);
+        var processValue = value.match(/\[([^:]*):(.*)\]/);
         if (processValue) {
             var type = processValue[1];
             var id = processValue[2];
