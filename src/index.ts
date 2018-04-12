@@ -1,5 +1,5 @@
 const visit = require(`unist-util-visit`);
-const getVideoId = require('get-video-id');
+const getVideoId = require("get-video-id");
 
 interface EmbedVideoOptions {
   width: number;
@@ -9,13 +9,13 @@ interface EmbedVideoOptions {
 }
 
 const VideoServices = {
-  YOUTUBE: 'youtube',
-  VIMEO: 'vimeo',
-  VIDEOPRESS: 'videopress'
-}
+  YOUTUBE: "youtube",
+  VIMEO: "vimeo",
+  VIDEOPRESS: "videopress"
+};
 
 class EmbedVideo {
-  knownPlatforms = ['youtube', 'vimeo', 'videopress'];
+  knownPlatforms = ["youtube", "vimeo", "videopress"];
 
   constructor(
     private type: string,
@@ -26,13 +26,12 @@ class EmbedVideo {
       width: 560,
       ratio: 1.77,
       related: false
-    }
+    };
     this.options = { ...defaultOptions, ...options };
 
     if (!this.options.height) {
       this.options.height = Math.round(this.options.width / this.options.ratio);
     }
-
   }
 
   getHTML() {
@@ -44,19 +43,18 @@ class EmbedVideo {
     } catch (e) {
       return `<p style="color: red">Error: ${e.message}</p>`;
     }
-
   }
 
-  readVideoId(): { service: string, id: string } {
+  readVideoId(): { service: string; id: string } {
     let videoId = getVideoId(this.id);
     if (videoId === undefined) {
-      if (this.type === 'video') {
-        throw new TypeError('Id could not be processed');
+      if (this.type === "video") {
+        throw new TypeError("Id could not be processed");
       } else {
         return {
           id: this.id,
           service: this.type
-        }
+        };
       }
     }
     return videoId;
@@ -66,33 +64,33 @@ class EmbedVideo {
     const urls: { [index: string]: string } = {
       youtube: `https://www.youtube.com/embed/${videoId}`,
       vimeo: `https://player.vimeo.com/video/${videoId}`,
-      videopress: `https://videopress.com/embed/${videoId}`,
+      videopress: `https://videopress.com/embed/${videoId}`
     };
 
     let url: string = urls[service];
 
     if (!url) {
-      throw new TypeError('Unknown Video Service');
+      throw new TypeError("Unknown Video Service");
     }
 
-    if (service === VideoServices.YOUTUBE && !(this.options.related)) {
-      url += '?rel=0';
+    if (service === VideoServices.YOUTUBE && !this.options.related) {
+      url += "?rel=0";
     }
 
     return url;
   }
 
   createIframe(videoPlatform: string, url: string) {
-    let iframeNode = `<iframe 
-              width="${this.options.width}" 
-              height="${this.options.height}" 
-              src="${url}" 
-              frameborder="0" 
+    let iframeNode = `<iframe
+              width="${this.options.width}"
+              height="${this.options.height}"
+              src="${url}"
+              frameborder="0"
               allowfullscreen
-            ></iframe>`
+            ></iframe>`;
 
     if (videoPlatform === VideoServices.VIDEOPRESS) {
-      iframeNode += `<script src="https://videopress.com/videopress-iframe.js"></script>`
+      iframeNode += `<script src="https://videopress.com/videopress-iframe.js"></script>`;
     }
 
     return iframeNode;
@@ -100,10 +98,10 @@ class EmbedVideo {
 }
 
 const addVideoIframe = ({ markdownAST }: any, options: EmbedVideoOptions) => {
-  visit(markdownAST, `text`, (node: { type: string, value: string }) => {
+  visit(markdownAST, `text`, (node: { type: string; value: string }) => {
     const { value } = node;
 
-    const processValue = value.match(/\[([^:]*):(.*)\]/);
+    const processValue = value.match(/(youtube|vimeo|videopress):\s*(\S+)/);
     if (processValue) {
       let type = processValue[1];
       let id = processValue[2];
@@ -114,9 +112,7 @@ const addVideoIframe = ({ markdownAST }: any, options: EmbedVideoOptions) => {
       node.type = `html`;
       node.value = embedVideo.getHTML();
     }
-
-  })
-}
+  });
+};
 
 export = addVideoIframe;
-
